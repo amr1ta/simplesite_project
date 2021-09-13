@@ -9,15 +9,16 @@ class HomePage(BasePage):
         super().open()
         self.wait_for_element(*HomePageLocators.MAIN_APP)
 
-    def filter_table_by_column_name(self, col_name):
-        self.find_element(*HomePageLocators.FILTER_DATA_TEXT_BOX).send_keys(col_name)
+    def filter_table_by_name(self, input_text):
+        self.find_element(*HomePageLocators.FILTER_DATA_TEXT_BOX).send_keys(input_text)
 
     def sort_table_by_column_name(self, col_name):
         select = Select(self.find_element(*HomePageLocators.SORT_DATA_DROP_DOWN))
         select.select_by_visible_text(col_name)
+        return select.first_selected_option.get_attribute("value")
 
-    def get_table_column_by_name(self, col_name):
-        col_locator = HomePageLocators.COLUMN_NAME_LOCATOR_LOOKUP[col_name.lower()]
+    def get_column_data(self, col_value="name"):
+        col_locator = HomePageLocators.table_column_name_locator(col_value)
         col_data = self.find_elements(*col_locator)
         data = [cell.text for cell in col_data]
         return data

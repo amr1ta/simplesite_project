@@ -23,7 +23,7 @@ class BasePage:
         return self.driver.find_elements(*locator)
 
     def wait_for_element(self, *locator):
-        return self.driver_wait.until(EC.visibility_of_element_located(locator))
+        self.driver_wait.until(EC.visibility_of_element_located(locator))
 
     def quit(self):
-        return self.driver.quit()
+        self.driver.quit()
