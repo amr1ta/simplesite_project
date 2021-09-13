@@ -25,5 +25,8 @@ class BasePage:
     def wait_for_element(self, *locator):
         self.driver_wait.until(EC.visibility_of_element_located(locator))
 
+    def refresh(self):
+        self.driver.refresh()
+
     def quit(self):
         self.driver.quit()
