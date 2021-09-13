@@ -1,6 +1,6 @@
 # Web application testing using pytest and selenium following Page Object Model Framework
 
-### Target Application: https://mystifying-beaver-ee03b5.netlify.app/
+### Target Web Application: https://mystifying-beaver-ee03b5.netlify.app/
 
 
 ## Run using Github-Actions
@@ -15,7 +15,7 @@ pytest -s --browser chrome --mode headless
 
 ## Test Scenarios Covered
 
-**Scenario 1**: Verifying that a selected column is sorted from low to high
+**Scenario 1**: Verify that a selected column is sorted from low to high
 
 Supported columns for sorting: **NUMBER OF CASES**, **AVERAGE IMPACT SCORE**
 
@@ -27,7 +27,7 @@ Steps:
 5. assert the column is sorted in ascending order
 
 
-**Scenario 2**: Verifying if a string matches values in the NAME and COMPLEXITY columns, the corresponding rows are returned and other rows are filtered out
+**Scenario 2**: Verify if a string matches values in the NAME and COMPLEXITY columns, the corresponding rows are returned and other rows are filtered out
 
 Steps:
 1. load url
@@ -38,13 +38,31 @@ Steps:
 6. assert the filter test criteria is available in any of the tuple values irrespective of case sensitivity
 
 
-**Scenario 3**: Verifying if a string does not match values in the NAME and COMPLEXITY columns, all  rows are filtered out
+**Scenario 3**: Verify if a string does not match values in the NAME and COMPLEXITY columns, all  rows are filtered out
 
 Steps:
 1. load url
 2. Insert string passed as parameters in "Filter data" text box
 3. store NAME column details
 4. assert that no rows are returned for non existing criterias
+
+
+**Scenario 4**: Verify combination of sorting first followed by filtering, the filtered columns should still be sorted
+
+Steps:
+1. load url
+2. Sort table by Impact score column
+3. Enter filter text (e.g "high") in the "Filter data" text box
+4. assert that "AVERAGE IMPACT SCORE" column is sorted and COMPLEXITY column contains only filter text. 
+
+
+**Scenario 5**: Verify combination of filtering first followed by sorting, the filtered columns should still be sorted
+
+Steps:
+1. load url
+2. Enter filter text (e.g "ack") in the "Filter data" text box
+3. Sort table by Number of cases score column
+4. assert that "NUMBER OF CASES" column is sorted and NAME column contains only filter text. 
 
 
 ## Test Environment
