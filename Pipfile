@@ -4,13 +4,9 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-behave = "*"
 selenium = "*"
 webdriver-manager = "*"
-pyhamcrest = "*"
-html-testrunner = "*"
-configparser = "*"
 pytest = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3"

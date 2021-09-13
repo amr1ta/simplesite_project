@@ -1,6 +1,10 @@
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+"""
+BasePage class : Page class which contains all the basic attributes for every single page inherited from Page class
+"""
+
 
 class BasePage:
     def __init__(
