@@ -1,43 +1,16 @@
-# Standard library imports
-import time, logging
+import logging
 
-# Related third party imports
 import pytest
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.chrome.options import Options
 
-# Local application import
-from pages.home_page import HomePage
-
+from utils.locators import HomePageLocators
 
 LOGGER = logging.getLogger(__name__)
-TABLE_COL_NAME_VALUE = "name"
-TABLE_COL_COMPLEXITY_VALUE = "complexity"
+
+# Visible names of all options in "Sort data" dropdown
+OPTION_NAMES = HomePageLocators.OPTION_NAMES
 
 
-@pytest.fixture(scope="class")
-def setup_teardown(request, pytestconfig):
-    """
-    Initialize base class using Selenium webdriver.
-    Run all testcases
-    Teardown: close the browser
-    """
-    browser = pytestconfig.getoption("browser")
-    mode = pytestconfig.getoption("mode")
-    base_url = pytestconfig.getoption("base_url")
-    options = Options()
-    if mode == "headless":
-        options.headless = True
-    if browser == "chrome":
-        driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-    home_page = HomePage(driver, base_url)
-    request.cls.home_page = home_page
-    yield
-    home_page.quit()
-
-
-@pytest.mark.usefixtures("setup_teardown")
+@pytest.mark.usefixtures("homepage_setup_teardown")
 class Test_SimpleSite:
     def floatify_num_cases(self, col_data_list):
         """
@@ -52,14 +25,16 @@ class Test_SimpleSite:
                 res = float(value[:-1])
                 col_data_list[idx] = float(res * units[unit])
 
-    @pytest.mark.parametrize("sort_by", ["Number of cases", "Impact score"])
+    @pytest.mark.parametrize(
+        "sort_by", [OPTION_NAMES["NUM_CASES"], OPTION_NAMES["IMPACT_SCORE"]]
+    )
     def test_sorting(self, sort_by):
         """
         **Scenario 1**: Verify that a selected column is sorted from low to high
         """
         self.home_page.open()
-        col_value = self.home_page.sort_table_by_column_name(sort_by)
-        col_data = self.home_page.get_column_data(col_value)
+        self.home_page.sort_table_by_column_name(sort_by)
+        col_data = self.home_page.get_column_data(sort_by)
         self.floatify_num_cases(col_data)
         assert sorted(col_data) == col_data, LOGGER.error("Values are not sorted")
 
@@ -72,8 +47,8 @@ class Test_SimpleSite:
         """
         self.home_page.open()
         self.home_page.filter_table(filter_text)
-        names = self.home_page.get_column_data(TABLE_COL_NAME_VALUE)
-        complexities = self.home_page.get_column_data(TABLE_COL_COMPLEXITY_VALUE)
+        names = self.home_page.get_column_data(OPTION_NAMES["NAME"])
+        complexities = self.home_page.get_column_data(OPTION_NAMES["COMPLEXITY"])
         filtered_row_data = list(zip(names, complexities))
         assert filtered_row_data, LOGGER.error(
             "No data captured from specified filters"
@@ -90,25 +65,26 @@ class Test_SimpleSite:
         """
         self.home_page.open()
         self.home_page.filter_table(filter_text)
-        names = self.home_page.get_column_data(TABLE_COL_NAME_VALUE)
+        names = self.home_page.get_column_data(OPTION_NAMES["NAME"])
         assert not names, LOGGER.error(
             "Unexpected results from non-existing filter string"
         )
 
     @pytest.mark.parametrize(
-        "sort_by,filter_text", [("Number of cases", "high"), ("Impact score", "low")]
+        "sort_by,filter_text",
+        [(OPTION_NAMES["NUM_CASES"], "high"), (OPTION_NAMES["IMPACT_SCORE"], "low")],
     )
     def test_sort_then_filter(self, sort_by, filter_text):
         """
         **Scenario 4**: Verify combination of sorting first followed by filtering, the filtered columns should still be sorted
         """
         self.home_page.open()
-        sort_col_value = self.home_page.sort_table_by_column_name(sort_by)
+        self.home_page.sort_table_by_column_name(sort_by)
         self.home_page.filter_table(filter_text)
-        sort_col_date = self.home_page.get_column_data(sort_col_value)
-        filter_col_data = self.home_page.get_column_data(TABLE_COL_COMPLEXITY_VALUE)
+        sort_col_data = self.home_page.get_column_data(sort_by)
+        filter_col_data = self.home_page.get_column_data(OPTION_NAMES["COMPLEXITY"])
         result = list()
-        result.append(sorted(sort_col_date) == sort_col_date)
+        result.append(sorted(sort_col_data) == sort_col_data)
         result.append(
             all(filter_text.lower() in cell.lower() for cell in filter_col_data)
         )
@@ -117,7 +93,8 @@ class Test_SimpleSite:
         )
 
     @pytest.mark.parametrize(
-        "filter_text,sort_by", [("ack", "Number of cases"), ("ack", "Impact score")]
+        "filter_text,sort_by",
+        [("ack", OPTION_NAMES["NUM_CASES"]), ("ack", OPTION_NAMES["IMPACT_SCORE"])],
     )
     def test_filter_then_sort(self, filter_text, sort_by):
         """
@@ -125,9 +102,9 @@ class Test_SimpleSite:
         """
         self.home_page.open()
         self.home_page.filter_table(filter_text)
-        sort_col_value = self.home_page.sort_table_by_column_name(sort_by)
-        sort_col_data = self.home_page.get_column_data(sort_col_value)
-        filter_col_data = self.home_page.get_column_data(TABLE_COL_NAME_VALUE)
+        self.home_page.sort_table_by_column_name(sort_by)
+        sort_col_data = self.home_page.get_column_data(sort_by)
+        filter_col_data = self.home_page.get_column_data(OPTION_NAMES["NAME"])
         result = list()
         self.floatify_num_cases(sort_col_data)
         result.append(sorted(sort_col_data) == sort_col_data)
